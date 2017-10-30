@@ -1,5 +1,6 @@
 package treesDataStructures;
 
+import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Queue;
@@ -44,8 +45,7 @@ public class TreeAlgorithms {
 		 * Lowest Common Ancestor
 		 */
 
-		 System.out.println(treeAlgorithms.commonAncestor(root, 3,
-		 19).data);
+		// System.out.println(treeAlgorithms.commonAncestor(root, 3, 19).data);
 
 		/*
 		 * Largest BST in Binary Tree
@@ -53,10 +53,29 @@ public class TreeAlgorithms {
 		// System.out.println(treeAlgorithms.largestBSTInBinaryTree(root)[1]);
 
 		/*
+		 * Prints the left view of the tree
+		 */
+		List<Integer> rightView = new ArrayList<Integer>();
+        treeAlgorithms.leftView(root, 1, 0, rightView);
+        System.out.println(rightView);
+
+		/*
 		 * AVLTree avl_root = treeAlgorithms .AVLTree(new
 		 * ArrayList<Integer>(Arrays.asList(10, 5, 15, -10, -20, 20, 30, -30)));
 		 */
 
+	}
+
+	public int leftView(Tree node, int level, int printed_depth, List<Integer> rightView) {
+		if (node == null)
+			return printed_depth;
+		if (level > printed_depth) {
+            rightView.add(node.data);
+			printed_depth++;
+		}
+		printed_depth = leftView(node.right, level+1, printed_depth, rightView);
+		printed_depth = leftView(node.left, level+1, printed_depth, rightView);
+		return printed_depth;
 	}
 
 	public boolean rootToLeafSum(Tree node, int value) {
@@ -339,15 +358,9 @@ public class TreeAlgorithms {
 }
 
 /*
- * Tree Structure 
+ * Tree Structure
  * 
- * 				10
- * 			 /		\
- * 			5		15
- * 		  /		  /    \
- * 		1		13		19
- * 		  \	   /		  \
- * 			3 12		   21
+ * 10 / \ 5 15 / / \ 1 13 19 \ / \ 3 12 21
  */
 
 class ConstructTree {
@@ -365,7 +378,9 @@ class ConstructTree {
 		root.left.left.right = new Tree(3);
 
 		root.right.left.left = new Tree(12);
-
+		
+		root.right.left.left.right = new Tree(7);
+		
 		root.right.right.right = new Tree(21);
 
 		return root;

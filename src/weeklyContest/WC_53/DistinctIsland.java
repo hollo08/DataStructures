@@ -5,8 +5,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import javax.print.attribute.IntegerSyntax;
-
 public class DistinctIsland {
 
 	public static void main(String[] args) {
