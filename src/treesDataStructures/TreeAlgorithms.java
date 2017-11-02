@@ -1,9 +1,13 @@
 package treesDataStructures;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.Queue;
+import java.util.Set;
 import java.util.Stack;
 
 public class TreeAlgorithms {
@@ -11,7 +15,7 @@ public class TreeAlgorithms {
 	public static void main(String[] args) {
 		TreeAlgorithms treeAlgorithms = new TreeAlgorithms();
 		ConstructTree constructTree = new ConstructTree();
-		Tree root = constructTree.constructTree();
+		TreeNode root = constructTree.constructTree();
 		/*
 		 * Root to leaf Sum in Binary Tree
 		 */
@@ -45,7 +49,7 @@ public class TreeAlgorithms {
 		 * Lowest Common Ancestor
 		 */
 
-		// System.out.println(treeAlgorithms.commonAncestor(root, 3, 19).data);
+		// System.out.println(treeAlgorithms.commonAncestor(root, 3, 19).val);
 
 		/*
 		 * Largest BST in Binary Tree
@@ -55,61 +59,263 @@ public class TreeAlgorithms {
 		/*
 		 * Prints the left view of the tree
 		 */
-		List<Integer> rightView = new ArrayList<Integer>();
-        treeAlgorithms.leftView(root, 1, 0, rightView);
-        System.out.println(rightView);
+		// List<Integer> rightView = new ArrayList<Integer>();
+		// treeAlgorithms.leftView(root, 1, 0, rightView);
+		// System.out.println(rightView);
 
 		/*
-		 * AVLTree avl_root = treeAlgorithms .AVLTree(new
+		 * Delete a node
+		 */
+		/*
+		 * treeAlgorithms.deleteNode(root, 10); treeAlgorithms.deleteNode(root,
+		 * 15); treeAlgorithms.deleteNode(root, 19);
+		 * treeAlgorithms.deleteNode(root, 21); treeAlgorithms.deleteNode(root,
+		 * 3); treeAlgorithms.deleteNode(root, 7);
+		 * treeAlgorithms.deleteNode(root, 1); treeAlgorithms.deleteNode(root,
+		 * 5); treeAlgorithms.deleteNode(root, 13);
+		 * treeAlgorithms.deleteNode(root, 12);
+		 */
+
+		/*
+		 * Most Frequent Subtree Sum
+		 */
+		/*
+		 * int[] frequentSum = treeAlgorithms.findFrequentTreeSum(root); for
+		 * (int i : frequentSum) { System.out.println(i); }
+		 */
+
+		/*
+		 * House Robber III
+		 */
+		// System.out.println(treeAlgorithms.rob(root));
+
+		/*
+		 * AVLTree avl_root = treeAlgorithms.AVLTree(new
 		 * ArrayList<Integer>(Arrays.asList(10, 5, 15, -10, -20, 20, 30, -30)));
 		 */
 
+		/*
+		 * Redundant Connection II
+		 */
+
+		int[][] edges = { { 1, 2 }, { 1, 3 }, { 2, 3 } };
+
+		int[] redundentEdge = treeAlgorithms.findRedundantDirectedConnection(edges);
+		System.out.println(redundentEdge[0] + " " + redundentEdge[1]);
+
+		/*
+		 * Cycle Detection
+		 */
+
+		// Map<Integer, List<Integer>> cycleIndex =
+		// treeAlgorithms.getEdgeMap(edges);
+		// System.out.println(cycleIndex);
+
 	}
 
-	public int leftView(Tree node, int level, int printed_depth, List<Integer> rightView) {
+	public int[] findRedundantDirectedConnection(int[][] edges) {
+		if (edges == null)
+			return new int[0];
+		Map<Integer, List<Integer>> childParentMap = new HashMap<Integer, List<Integer>>();
+		Integer twoParentChild = null;
+
+		for (int i = 0; i < edges.length; i++) {
+			int[] edge = edges[i];
+			int child = edge[1];
+			if (childParentMap.containsKey(child)) {
+				twoParentChild = child;
+				childParentMap.get(child).add(edge[0]);
+			} else {
+				List<Integer> childIndex = new ArrayList<Integer>();
+				childIndex.add(edge[0]);
+				childParentMap.put(child, childIndex);
+			}
+		}
+
+		Map<Integer, List<Integer>> edgeMap = getEdgeMap(edges);
+		if (twoParentChild == null) {
+			int count = 0;
+			int currentChild = edges[edges.length - 1][0];
+			boolean foundLoop = false;
+			while (count < edges.length) {
+				List<Integer> parents = edgeMap.get(currentChild);
+				if (parents == null || parents.size() == 0) {
+					break;
+				} else if (parents.size() == 2) {
+					foundLoop = true;
+					break;
+				} else if (parents.size() == 1) {
+					currentChild = parents.get(0);
+					if (currentChild == edges[edges.length - 1][1]) {
+						foundLoop = true;
+						break;
+					}
+				}
+				count++;
+			}
+			if (foundLoop)
+				return edges[edges.length - 1];
+			else
+				return edges[edges.length - 2];
+		} else {
+			int parent1 = childParentMap.get(twoParentChild).get(0);
+			int parent2 = childParentMap.get(twoParentChild).get(1);
+			int count = 0;
+			boolean foundLoop = false;
+			int currentChild = parent1;
+			while (count < edges.length) {
+				List<Integer> parents = edgeMap.get(currentChild);
+				if (parents == null || parents.size() == 0) {
+					break;
+				} else if (parents.size() == 2) {
+					foundLoop = true;
+					break;
+				} else if (parents.size() == 1) {
+					currentChild = parents.get(0);
+					if (currentChild == edges[edges.length - 1][1]) {
+						foundLoop = true;
+						break;
+					}
+				}
+				count++;
+			}
+			if (!foundLoop) {
+				return new int[] { parent2, twoParentChild };
+			} else {
+				return new int[] { parent1, twoParentChild };
+			}
+		}
+	}
+
+	public Map<Integer, List<Integer>> getEdgeMap(int[][] edges) {
+		Map<Integer, List<Integer>> edgesMap = new HashMap<Integer, List<Integer>>();
+		for (int i = 0; i < edges.length; i++) {
+			int[] edge = edges[i];
+			if (!edgesMap.containsKey(edge[1]))
+				edgesMap.put(edge[1], new ArrayList<Integer>());
+			edgesMap.get(edge[1]).add(edge[0]);
+		}
+		return edgesMap;
+	}
+
+	public int rob(TreeNode root) {
+		if (root == null)
+			return 0;
+		int[] maxRobValue = robHouse(root);
+		return Math.max(maxRobValue[0], maxRobValue[1]);
+	}
+
+	public int[] robHouse(TreeNode node) {
+		int[] returnValue;
+		if (node.left == null && node.right == null) {
+			returnValue = new int[] { 0, node.val };
+			return returnValue;
+		} else if (node.left == null && node.right != null) {
+			int[] rightChildMaxValues = robHouse(node.right);
+			returnValue = new int[] { Math.max(rightChildMaxValues[0], rightChildMaxValues[1]),
+					node.val + rightChildMaxValues[0] };
+			return returnValue;
+		} else if (node.left != null && node.right == null) {
+			int[] leftChildMaxValues = robHouse(node.left);
+			returnValue = new int[] { Math.max(leftChildMaxValues[0], leftChildMaxValues[1]),
+					node.val + leftChildMaxValues[0] };
+			return returnValue;
+		} else {
+			int[] leftChildMaxValues = robHouse(node.left);
+			int[] rightChildMaxValues = robHouse(node.right);
+			returnValue = new int[] {
+					Math.max(leftChildMaxValues[0], leftChildMaxValues[1])
+							+ Math.max(rightChildMaxValues[0], rightChildMaxValues[1]),
+					node.val + leftChildMaxValues[0] + rightChildMaxValues[0] };
+			return returnValue;
+		}
+	}
+
+	public int[] findFrequentTreeSum(TreeNode root) {
+		List<Integer> frequentSum = new ArrayList<Integer>();
+		Map<Integer, Integer> sumMap = new HashMap<Integer, Integer>();
+		findTreeSum(root, sumMap, 0);
+		int max = Integer.MIN_VALUE;
+		for (int key : sumMap.keySet()) {
+			if (max < sumMap.get(key))
+				max = sumMap.get(key);
+		}
+		for (int key : sumMap.keySet()) {
+			if (sumMap.get(key) == max) {
+				frequentSum.add(key);
+			}
+		}
+		int[] returnValues = new int[frequentSum.size()];
+		int index = 0;
+		for (Integer val : frequentSum) {
+			returnValues[index++] = val;
+		}
+		return returnValues;
+	}
+
+	public int findTreeSum(TreeNode node, Map<Integer, Integer> sumMap, int sum) {
+		Integer leftSum = null;
+		Integer rightSum = null;
+		if (node.left != null)
+			leftSum = findTreeSum(node.left, sumMap, sum);
+		if (node.right != null)
+			rightSum = findTreeSum(node.right, sumMap, sum);
+		int presentSum = leftSum == null ? (rightSum == null ? node.val : node.val + rightSum)
+				: (rightSum == null ? node.val + leftSum : node.val + leftSum + rightSum);
+
+		if (sumMap.containsKey(presentSum)) {
+			sumMap.put(presentSum, sumMap.get(presentSum) + 1);
+		} else {
+			sumMap.put(presentSum, 1);
+		}
+
+		return presentSum;
+	}
+
+	public int leftView(TreeNode node, int level, int printed_depth, List<Integer> rightView) {
 		if (node == null)
 			return printed_depth;
 		if (level > printed_depth) {
-            rightView.add(node.data);
+			rightView.add(node.val);
 			printed_depth++;
 		}
-		printed_depth = leftView(node.right, level+1, printed_depth, rightView);
-		printed_depth = leftView(node.left, level+1, printed_depth, rightView);
+		printed_depth = leftView(node.right, level + 1, printed_depth, rightView);
+		printed_depth = leftView(node.left, level + 1, printed_depth, rightView);
 		return printed_depth;
 	}
 
-	public boolean rootToLeafSum(Tree node, int value) {
+	public boolean rootToLeafSum(TreeNode node, int value) {
 		if (node.left == null && node.right == null)
-			if (node.data == value)
+			if (node.val == value)
 				return true;
 			else
 				return false;
 		else {
 			if (node.left != null && node.right != null)
-				return (rootToLeafSum(node.left, value - node.data) || rootToLeafSum(node.right, value - node.data));
+				return (rootToLeafSum(node.left, value - node.val) || rootToLeafSum(node.right, value - node.val));
 			else if (node.left != null && node.right == null)
-				return rootToLeafSum(node.left, value - node.data);
+				return rootToLeafSum(node.left, value - node.val);
 			else
-				return rootToLeafSum(node.right, value - node.data);
+				return rootToLeafSum(node.right, value - node.val);
 		}
 	}
 
-	public boolean isBinaryTree(Tree node, int lower, int upper) {
+	public boolean isBinaryTree(TreeNode node, int lower, int upper) {
 		if (node != null) {
-			if (lower <= node.data && node.data <= upper) {
-				return (isBinaryTree(node.left, lower, node.data) && isBinaryTree(node.right, node.data, upper));
+			if (lower <= node.val && node.val <= upper) {
+				return (isBinaryTree(node.left, lower, node.val) && isBinaryTree(node.right, node.val, upper));
 			} else
 				return false;
 		} else
 			return true;
 	}
 
-	public void reverseLevelOrder(Tree root) {
-		Queue<Tree> queue = new LinkedList<Tree>();
-		Stack<Tree> stack = new Stack<Tree>();
+	public void reverseLevelOrder(TreeNode root) {
+		Queue<TreeNode> queue = new LinkedList<TreeNode>();
+		Stack<TreeNode> stack = new Stack<TreeNode>();
 		queue.add(root);
 		while (!queue.isEmpty()) {
-			Tree current = queue.remove();
+			TreeNode current = queue.remove();
 			if (current.left != null)
 				queue.add(current.left);
 			if (current.right != null)
@@ -117,18 +323,18 @@ public class TreeAlgorithms {
 			stack.push(current);
 		}
 		while (!stack.isEmpty())
-			System.out.println(stack.pop().data);
+			System.out.println(stack.pop().val);
 	}
 
-	public void levelByLevelPrinting(Tree root) {
-		Queue<Tree> queue = new LinkedList<Tree>();
+	public void levelByLevelPrinting(TreeNode root) {
+		Queue<TreeNode> queue = new LinkedList<TreeNode>();
 		int levelCounter = 1, currentCounter;
 		queue.add(root);
 		while (!queue.isEmpty()) {
 			currentCounter = levelCounter;
 			levelCounter = 0;
 			while (currentCounter > 0) {
-				Tree current = queue.remove();
+				TreeNode current = queue.remove();
 				if (current.left != null) {
 					queue.add(current.left);
 					levelCounter++;
@@ -137,49 +343,49 @@ public class TreeAlgorithms {
 					queue.add(current.right);
 					levelCounter++;
 				}
-				System.out.print(current.data + ", ");
+				System.out.print(current.val + ", ");
 				currentCounter--;
 			}
 			System.out.println();
 		}
 	}
 
-	public void spiralOrderPrinting(Tree root) {
+	public void spiralOrderPrinting(TreeNode root) {
 		// Technique 1: Two Stacks
-		Stack<Tree> r2l = new Stack<Tree>();
-		Stack<Tree> l2r = new Stack<Tree>();
+		Stack<TreeNode> r2l = new Stack<TreeNode>();
+		Stack<TreeNode> l2r = new Stack<TreeNode>();
 		r2l.push(root);
 		while (!r2l.isEmpty() || !l2r.isEmpty()) {
 			if (!r2l.isEmpty()) {
 				while (!r2l.isEmpty()) {
-					Tree current = r2l.pop();
+					TreeNode current = r2l.pop();
 					if (current.left != null)
 						l2r.push(current.left);
 					if (current.right != null)
 						l2r.push(current.right);
-					System.out.println(current.data);
+					System.out.println(current.val);
 				}
 			} else {
 				while (!l2r.isEmpty()) {
-					Tree current = l2r.pop();
+					TreeNode current = l2r.pop();
 					if (current.right != null)
 						r2l.push(current.right);
 					if (current.left != null)
 						r2l.push(current.left);
-					System.out.println(current.data);
+					System.out.println(current.val);
 				}
 			}
 		}
 	}
 
-	public Tree commonAncestor(Tree node, int node1, int node2) {
+	public TreeNode commonAncestor(TreeNode node, int node1, int node2) {
 		if (node == null)
 			return null;
 		else {
-			if (node.data == node1 || node.data == node2)
+			if (node.val == node1 || node.val == node2)
 				return node;
 			else {
-				Tree left = null, right = null;
+				TreeNode left = null, right = null;
 				if (node.left != null && node.right == null) {
 					left = commonAncestor(node.left, node1, node2);
 					return left;
@@ -203,9 +409,74 @@ public class TreeAlgorithms {
 		}
 	}
 
-	public Object[] largestBSTInBinaryTree(Tree node) {
+	public void deleteNode(TreeNode root, int value) {
+		if (root != null) {
+			TreeNode parent = null;
+			TreeNode node = root;
+			boolean found = false;
+			while (node != null) {
+				if (node.val == value) {
+					found = true;
+					break;
+				} else if (node.val > value) {
+					parent = node;
+					node = node.left;
+				} else {
+					parent = node;
+					node = node.right;
+				}
+			}
+			if (!found)
+				return;
+			TreeNode[] temp = getSucessor(node);
+			TreeNode sucessor = temp[1];
+			TreeNode sucessorParent = temp[0];
+			if (sucessor == null) {
+				if (parent == null) {
+					parent = node;
+					root = node.left;
+				} else if (parent.val < node.val) {
+					parent.right = node.left;
+				} else {
+					parent.left = null;
+				}
+				node = null;
+			} else {
+				int temp2 = node.val;
+				node.val = sucessor.val;
+				sucessor.val = temp2;
+				if (sucessorParent == node) {
+					sucessorParent.right = sucessor.right;
+				} else {
+					sucessorParent.left = sucessor.right;
+				}
+				sucessor = null;
+			}
+		}
+	}
+
+	public TreeNode[] getSucessor(TreeNode node) {
+		TreeNode[] returnObj;
+		if (node == null) {
+			returnObj = new TreeNode[] { null, null };
+			return returnObj;
+		} else if (node.right == null) {
+			returnObj = new TreeNode[] { null, null };
+			return returnObj;
+		}
+		TreeNode sucessorParent = node;
+		TreeNode sucessor = node.right;
+		while (sucessor.left != null) {
+			sucessorParent = sucessor;
+			sucessor = sucessor.left;
+		}
+		returnObj = new TreeNode[] { sucessorParent, sucessor };
+		return returnObj;
+	}
+
+	public Object[] largestBSTInBinaryTree(TreeNode node) {
 		if (node.left == null && node.right == null)
-			return new Object[] { true, 1, node.data, node.data };
+			return new Object[] { true, 1, node.val, node.val };
 		else {
 			Object[] left_child_status = null;
 			Object[] right_child_status = null;
@@ -224,13 +495,13 @@ public class TreeAlgorithms {
 				right_big = (int) right_child_status[3];
 			}
 			if (left_child_status == null) {
-				if (node.data < (int) right_small)
-					return new Object[] { true, right_best + 1, node.data, right_big };
+				if (node.val < (int) right_small)
+					return new Object[] { true, right_best + 1, node.val, right_big };
 				else
 					return new Object[] { false, right_best, right_small, right_big };
 			} else if (right_child_status == null) {
-				if (node.data > (int) left_small)
-					return new Object[] { true, left_best + 1, left_small, node.data };
+				if (node.val > (int) left_small)
+					return new Object[] { true, left_best + 1, left_small, node.val };
 				else
 					return new Object[] { false, left_best, left_small, left_big };
 			}
@@ -242,7 +513,7 @@ public class TreeAlgorithms {
 			} else if ((boolean) left_child_status[0] == true && (boolean) right_child_status[0] == false) {
 				return new Object[] { false, left_best, left_small, left_big };
 			} else {
-				if (node.data >= left_big && node.data < right_big)
+				if (node.val >= left_big && node.val < right_big)
 					return new Object[] { true, left_best + 1 + right_best, left_small, right_big };
 				return left_best > right_best ? new Object[] { false, left_best, left_small, left_big }
 						: new Object[] { false, right_best, right_small, right_big };
@@ -358,44 +629,45 @@ public class TreeAlgorithms {
 }
 
 /*
- * Tree Structure
+ * TreeNode Structure
  * 
  * 10 / \ 5 15 / / \ 1 13 19 \ / \ 3 12 21
  */
 
 class ConstructTree {
-	public Tree constructTree() {
-		Tree root = new Tree(10);
+	public TreeNode constructTree() {
+		TreeNode root = new TreeNode(10);
 
-		root.left = new Tree(5);
-		root.right = new Tree(15);
+		root.left = new TreeNode(5);
+		root.right = new TreeNode(15);
 
-		root.left.left = new Tree(1);
+		root.left.left = new TreeNode(1);
+		root.left.right = new TreeNode(7);
+		root.right.left = new TreeNode(13);
+		root.right.right = new TreeNode(19);
 
-		root.right.left = new Tree(13);
-		root.right.right = new Tree(19);
-
-		root.left.left.right = new Tree(3);
-
-		root.right.left.left = new Tree(12);
-		
-		root.right.left.left.right = new Tree(7);
-		
-		root.right.right.right = new Tree(21);
+		root.left.left.right = new TreeNode(3);
+		root.right.left.left = new TreeNode(12);
+		root.right.right.right = new TreeNode(21);
 
 		return root;
 	}
 }
 
-class Tree {
-	public int data;
-	public Tree right;
-	public Tree left;
+class TreeNode {
+	Integer val;
+	TreeNode left;
+	TreeNode right;
 
-	public Tree(int data) {
-		this.data = data;
+	public TreeNode(int val) {
+		this.val = val;
 		this.right = null;
 		this.left = null;
+	}
+
+	@Override
+	public String toString() {
+		return val.toString();
 	}
 }
 
